@@ -1,16 +1,18 @@
 <?php
 
-namespace Ephect\Framework\Components;
+namespace Ephect\Plugins\WebComponent;
 
-use Ephect\Framework\Utils\File;
+use Ephect\Framework\Components\AbstractFileComponent;
 use Ephect\Framework\Registry\ComponentRegistry;
+use Ephect\Framework\Registry\WebComponentRegistry;
+use Ephect\Framework\Utils\File;
 
-class Component extends AbstractFileComponent implements FileComponentInterface
+class WebComponent extends AbstractFileComponent
 {
 
     public function makeComponent(string $filename, string &$html): void
     {
-        $info = (object)pathinfo($filename);
+        $info = (object) pathinfo($filename);
         $namespace = CONFIG_NAMESPACE;
         $function = $info->filename;
 
@@ -19,22 +21,21 @@ class Component extends AbstractFileComponent implements FileComponentInterface
 
         namespace $namespace;
 
-        function $function(): string
+        use function Ephect\Hooks\useEffect;
+
+        #[WebComponentZeroConf]
+        function $function(\$slot): string
         {
         return (<<< HTML
+        <WebComponent>
         $html
+        </WebComponent>
         HTML);
         }
         COMPONENT;
 
         File::safeWrite(COPY_DIR . $filename, $html);
-    }
 
-    public function parse(): void
-    {
-        parent::parse();
-
-        $this->cacheHtml();
     }
 
     public function analyse(): void
@@ -43,6 +44,13 @@ class Component extends AbstractFileComponent implements FileComponentInterface
 
         ComponentRegistry::write($this->getFullyQualifiedFunction(), $this->getSourceFilename());
         ComponentRegistry::safeWrite($this->getFunction(), $this->getFullyQualifiedFunction());
+        ComponentRegistry::save();
+    }
+
+    public function parse(): void
+    {
+        parent::parse();
+        $this->cacheHtml();
     }
 
 }

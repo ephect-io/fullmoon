@@ -4,34 +4,19 @@ namespace Ephect\Apps\Builder\Descriptors;
 
 use Ephect\Framework\Components\ComponentEntity;
 use Ephect\Framework\Components\Generators\ComponentParser;
-use Ephect\Framework\Logger\Logger;
 use Ephect\Framework\Registry\CodeRegistry;
 use Ephect\Framework\Registry\ComponentRegistry;
 use Ephect\Framework\Utils\File;
+use Ephect\Plugins\WebComponent\WebComponent;
 
-class ModuleDescriptor implements DescriptorInterface
+class WebComponentDescriptor implements DescriptorInterface
 {
-    public function __construct(private string $modulePath)
-    {
-    }
-
     public function describe(string $sourceDir, string $filename): array
     {
         File::safeMkDir(COPY_DIR . pathinfo($filename, PATHINFO_DIRNAME));
         copy($sourceDir . $filename, COPY_DIR . $filename);
 
-        //TODO: get module class from module middleware
-        $moduleConfigDir = $this->modulePath . DIRECTORY_SEPARATOR . REL_CONFIG_DIR;
-        $moduleEntrypointFile = $moduleConfigDir . 'entrypoint.php';
-        $moduleEntrypoint = file_exists($moduleEntrypointFile) ? require_once $moduleEntrypointFile : null;
-
-        Logger::create()->info("Module entrypoint: $moduleEntrypoint:");
-
-        if($moduleEntrypoint == null) {
-            throw new \Exception("Module entry point not found in {$moduleEntrypointFile}");
-        }
-
-        $comp = new $moduleEntrypoint;
+        $comp = new WebComponent();
         $comp->load($filename);
         $comp->analyse();
 

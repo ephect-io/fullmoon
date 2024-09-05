@@ -2,11 +2,10 @@
 
 namespace Ephect\Apps\Builder;
 
-use Ephect\Apps\Builder\Copiers\TemplatesCopyMaker;
-use Ephect\Apps\Builder\Copiers\TemplatesCopier;
+use Ephect\Apps\Builder\Copiers\FilesCopier;
 use Ephect\Apps\Builder\Descriptors\ComponentListDescriptor;
-use Ephect\Apps\Builder\Descriptors\ModuleListDescriptor;
 use Ephect\Apps\Builder\Descriptors\PluginListDescriptor;
+use Ephect\Apps\Builder\Descriptors\WebComponentListDescriptor;
 use Ephect\Apps\Builder\Routes\Finder;
 use Ephect\Apps\Builder\Strategy\BuildByNameStrategy;
 use Ephect\Apps\Builder\Strategy\BuildByRouteStrategy;
@@ -39,8 +38,9 @@ class Builder
             File::safeMkDir(COPY_DIR);
             File::safeMkDir(STATIC_DIR);
 
-            $copier = new TemplatesCopyMaker;
+            $copier = new FilesCopier;
 
+//            $copier->makeCopies();
             $copier->makeCopies(true); // make unique copies
 
             CodeRegistry::load();
@@ -48,22 +48,6 @@ class Builder
             $descriptor = new ComponentListDescriptor;
             $components = $descriptor->describe();
             $this->list = [...$this->list, ...$components];
-
-            [$filename, $modulePaths]  = PluginRegistry::readPluginPaths();
-            foreach ($modulePaths as $path) {
-                $moduleConfigDir = $path . DIRECTORY_SEPARATOR . REL_CONFIG_DIR;
-                $moduleSrcPathFile = $moduleConfigDir . REL_CONFIG_APP;
-                $moduleSrcPath = file_exists($moduleSrcPathFile) ? $path . DIRECTORY_SEPARATOR . file_get_contents($moduleSrcPathFile) : $path . DIRECTORY_SEPARATOR . REL_CONFIG_APP;
-
-                if (!ComponentRegistry::load()) {
-                    $descriptor = new ModuleListDescriptor($path);
-                    $moduleComponents = $descriptor->describe($moduleSrcPath);
-                    $this->list = [...$this->list, ...$moduleComponents];
-
-                    CodeRegistry::save();
-                    ComponentRegistry::save();
-                }
-            }
 
             CodeRegistry::save();
             ComponentRegistry::save();
@@ -76,7 +60,18 @@ class Builder
 
             PluginRegistry::save();
             ComponentRegistry::save();
-       }
+        }
+
+        if (file_exists(CUSTOM_WEBCOMPONENTS_ROOT)) {
+            if (!ComponentRegistry::load()) {
+                $descriptor = new WebComponentListDescriptor;
+                $webcomponents = $descriptor->describe();
+                $this->list = [...$this->list, ...$webcomponents];
+
+                CodeRegistry::save();
+                ComponentRegistry::save();
+            }
+        }
     }
 
     public function prepareRoutedComponents(): void

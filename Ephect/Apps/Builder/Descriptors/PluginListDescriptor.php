@@ -6,7 +6,7 @@ use Ephect\Framework\Utils\File;
 
 class PluginListDescriptor implements ComponentListDescriptorInterface
 {
-    public function describe(string $templateDir = ''): array
+    public function describe(): array
     {
         $result = [];
 

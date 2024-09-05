@@ -4,6 +4,6 @@ namespace Ephect\Apps\Builder\Descriptors;
 
 interface ComponentListDescriptorInterface
 {
-    public function describe(string $templateDir = ''): array;
+    public function describe(): array;
 
 }

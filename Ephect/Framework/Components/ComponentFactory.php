@@ -2,13 +2,14 @@
 
 namespace Ephect\Framework\Components;
 
-use Ephect\Framework\Components\Application\ApplicationComponent;
 use Ephect\Framework\Registry\ComponentRegistry;
 use Ephect\Framework\Registry\PluginRegistry;
+use Ephect\Framework\Registry\WebComponentRegistry;
+use Ephect\Plugins\WebComponent\WebComponent;
 
 class ComponentFactory
 {
-    public static function create(string $fullyQualifiedName, string $motherUID): ApplicationComponent
+    public static function create(string $fullyQualifiedName, string $motherUID): AbstractFileComponent
     {
 
         $filename = ComponentRegistry::read($fullyQualifiedName);
