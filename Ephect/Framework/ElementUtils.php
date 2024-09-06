@@ -30,10 +30,10 @@ final class ElementUtils
     {
 
         $re = '/namespace *?([\w\\\\]+);[\w\W\\\\]*function *?([$\w]+) *?\(([\w\W]*)\)\W*:? *?(\w+)?\W*(\{)/U';
-        
+
         preg_match($re, $contents, $matches, PREG_OFFSET_CAPTURE, 0);
 
-        if(!count($matches)) {
+        if (!count($matches)) {
             return ['', '', '', '', -1];
         }
         $namespace = $matches[1][0];
@@ -43,21 +43,6 @@ final class ElementUtils
         $pos = $matches[5][1];
 
         return [$namespace, $functionName, $parameters, $returnedType, $pos];
-    }
-
-    public static function grabKeywordName(string $keyword, string $classText, string $delimiter): array
-    {
-        $result = '';
-
-        $end = -1;
-        $start = strpos($classText, $keyword);
-        if ($start > -1) {
-            $start += strlen($keyword) + 1;
-            $end = strpos($classText, $delimiter, $start);
-            $result = trim(substr($classText, $start, $end - $start));
-        }
-
-        return [$result, $end];
     }
 
     public static function getEnumDefinitionFromFile($filepath): ?array
@@ -81,6 +66,22 @@ final class ElementUtils
         $enumName = trim($enumName);
 
         return [$namespace, $enumName, $pos];
+    }
+
+    public static function grabKeywordName(string $keyword, string $classText, string $delimiter): array
+    {
+        $result = '';
+        $needle = $keyword . ' ';
+
+        $end = -1;
+        $start = strpos($classText, $needle);
+        if ($start > -1) {
+            $start += strlen($needle);
+            $end = strpos($classText, $delimiter, $start);
+            $result = trim(substr($classText, $start, $end - $start));
+        }
+
+        return [$result, $end];
     }
 
     public static function getTraitDefinitionFromFile($filepath): ?array

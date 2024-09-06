@@ -3,6 +3,7 @@
 namespace Ephect\Framework\Core;
 
 use Ephect\Framework\Registry\FrameworkRegistry;
+use Exception;
 
 class Autoloader
 {
@@ -24,9 +25,9 @@ class Autoloader
         /**
          * Activate only for debug
          */
-//        if(empty($classFilename)) {
-//            throw new \Exception("Class $className not found");
-//        }
+        if (empty($classFilename)) {
+            throw new Exception("Class $className not found");
+        }
 
         include $classFilename;
     }
