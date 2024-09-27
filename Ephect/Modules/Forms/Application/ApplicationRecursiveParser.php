@@ -1,17 +1,13 @@
 <?php
 
-namespace Forms\Application;
+namespace Ephect\Modules\Forms\Application;
 
-use Ephect\Framework\Utils\File;
-use Ephect\Modules\Forms\Components\Component;
 use Ephect\Modules\Forms\Components\FileComponentInterface;
 use Ephect\Modules\Forms\Registry\CodeRegistry;
-use Forms\Generators\ComponentParser;
-use Forms\Generators\ParserService;
+use Ephect\Modules\Forms\Generators\ParserService;
 
-class ApplicationRecursiveParser
+class ApplicationRecursiveParser extends AbstractApplicationParser
 {
-    use ComponentCodeTrait;
 
     /**
      * @return void
@@ -22,46 +18,6 @@ class ApplicationRecursiveParser
         CodeRegistry::load();
 
         $parser = new ParserService();
-
-        $parser->doAttributes($component);
-
-        $parser->doUses($component);
-        $parser->doUsesAs($component);
-
-        $parser->doHeredoc($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doInlineCode($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doChildrenDeclaration($component);
-
-        $parser->doArrays($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doUseEffect($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doReturnType($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doModuleComponent($component);
-
-        $parser->doUseVariables($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doNamespace($component);
-        $component->applyCode($parser->getHtml());
-
-        $parser->doFragments($component);
-        $component->applyCode($parser->getHtml());
-
-        $filename = $component->getSourceFilename();
-        File::safeWrite(
-            CACHE_DIR . $component->getMotherUID() . DIRECTORY_SEPARATOR . $filename,
-            $component->getCode()
-        );
-        self::updateComponent($component);
 
         $parser->doChildSlots($component);
         $component->applyCode($parser->getHtml());
@@ -83,21 +39,4 @@ class ApplicationRecursiveParser
         CodeRegistry::save();
     }
 
-    public static function updateComponent(FileComponentInterface $component): string
-    {
-        $uid = $component->getUID();
-        $motherUID = $component->getMotherUID();
-        $filename = $component->getSourceFilename();
-
-        $comp = new Component($uid, $motherUID);
-        $comp->load($filename);
-        $parser = new ComponentParser($comp);
-        $struct = $parser->doDeclaration($uid);
-        $decl = $struct->toArray();
-
-        CodeRegistry::write($comp->getFullyQualifiedFunction(), $decl);
-        CodeRegistry::save();
-
-        return $filename;
-    }
 }
